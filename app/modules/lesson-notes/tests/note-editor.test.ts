@@ -31,6 +31,15 @@ describe("describeNoteEditor", () => {
     expect(view({ draft: "   " }).canSave).toBe(false);
   });
 
+  it("disables Save when a saved note is cleared, since the server rejects an empty note", () => {
+    const result = view({
+      draft: "  ",
+      saved: { body: "hello", updatedAt: savedAt(0) },
+    });
+    expect(result.canSave).toBe(false);
+    expect(result.status).toEqual({ tone: "muted", text: "Unsaved changes" });
+  });
+
   it("enables Save and flags unsaved changes once the draft differs", () => {
     const result = view({ draft: "hello" });
     expect(result.canSave).toBe(true);
