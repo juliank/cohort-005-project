@@ -94,7 +94,7 @@ const HANDLERS: Record<string, IntentHandler> = {
   }),
   "save-note": saveNoteIntent,
   "mark-complete": ({ person, lessonId }) => {
-    markLessonComplete(person.id, lessonId);
+    markLessonComplete(person.id, lessonId, new Date());
     return { success: true };
   },
   "submit-quiz": submitQuizIntent,
