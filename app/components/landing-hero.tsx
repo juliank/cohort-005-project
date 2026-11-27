@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { ArrowRight, BookOpen, Sparkles, User } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { CourseImage } from "~/components/course-image";
+import { cn } from "~/lib/utils";
 import type { HeroAction } from "~/modules/landing";
 
 export type HeroCourse = {
@@ -27,7 +28,12 @@ export function LandingHero({
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-linear-to-br from-transparent via-transparent to-primary/5"
       />
-      <div className="relative mx-auto grid max-w-6xl items-center gap-16 px-6 py-20 lg:grid-cols-[1.1fr_1fr] lg:py-28">
+      <div
+        className={cn(
+          "relative mx-auto grid max-w-6xl items-center gap-16 px-6 py-20 lg:py-28",
+          course && "lg:grid-cols-[1.1fr_1fr]"
+        )}
+      >
         <div>
           <p className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
             <Sparkles className="size-3.5 text-primary" />
