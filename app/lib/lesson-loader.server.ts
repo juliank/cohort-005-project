@@ -108,11 +108,9 @@ const NO_PROGRESS = {
 };
 
 function loadProgress(userId: number, lesson: Lesson, courseId: number) {
-  // Mark lesson as in-progress when viewed
   markLessonInProgress(userId, lesson.id);
   const progress = getLessonProgress(userId, lesson.id);
 
-  // Get progress for all lessons in course (for curriculum sidebar)
   const lessonProgressMap: Record<number, string> = {};
   for (const record of getLessonProgressForCourse(userId, courseId)) {
     lessonProgressMap[record.lessonId] = record.status;
@@ -152,7 +150,6 @@ async function loadContent(
     ? getNote(db, currentUserId, lesson.id)
     : undefined;
 
-  // Render lesson content from Markdown to HTML server-side
   const contentHtml = lesson.content
     ? await renderMarkdown(lesson.content)
     : null;

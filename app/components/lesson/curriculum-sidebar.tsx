@@ -74,7 +74,6 @@ function useExpandedModules(
   currentLessonId: number
 ) {
   const [expandedModules, setExpandedModules] = useState<Set<number>>(() => {
-    // Start with the module holding the current lesson expanded
     const currentModuleId = curriculum.find((m) =>
       m.lessons.some((l) => l.id === currentLessonId)
     )?.id;
