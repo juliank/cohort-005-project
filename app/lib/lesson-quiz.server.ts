@@ -122,20 +122,23 @@ function recordAttempt(
   attempt: { userId: number; quizId: number; score: number; passed: boolean },
   questionResults: QuestionResult[]
 ) {
-  const saved = db.insert(quizAttempts).values(attempt).returning().get();
+  // An attempt without its answers would score a quiz nobody can review.
+  return db.transaction((tx) => {
+    const saved = tx.insert(quizAttempts).values(attempt).returning().get();
 
-  for (const result of questionResults) {
-    if (result.selectedOptionId !== null) {
-      db.insert(quizAnswers)
-        .values({
-          attemptId: saved.id,
-          questionId: result.questionId,
-          selectedOptionId: result.selectedOptionId,
-        })
-        .run();
+    for (const result of questionResults) {
+      if (result.selectedOptionId !== null) {
+        tx.insert(quizAnswers)
+          .values({
+            attemptId: saved.id,
+            questionId: result.questionId,
+            selectedOptionId: result.selectedOptionId,
+          })
+          .run();
+      }
     }
-  }
-  return saved;
+    return saved;
+  });
 }
 
 export function computeResult(
