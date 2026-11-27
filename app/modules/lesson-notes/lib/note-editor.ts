@@ -26,8 +26,10 @@ export type NoteEditorView = {
 export function describeNoteEditor(input: NoteEditorInput): NoteEditorView {
   const { draft, saved, isSaving, error, maxLength, now } = input;
   const overLimit = draft.length > maxLength;
-  const dirty = draft !== (saved?.body ?? "");
-  const empty = draft.trim().length === 0;
+  // The server trims before it saves, so compare what it would store.
+  const trimmed = draft.trim();
+  const dirty = trimmed !== (saved?.body ?? "");
+  const empty = trimmed.length === 0;
 
   return {
     canSave: dirty && !empty && !overLimit && !isSaving,

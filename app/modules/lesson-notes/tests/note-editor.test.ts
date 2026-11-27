@@ -47,6 +47,15 @@ describe("describeNoteEditor", () => {
     expect(result.status).toEqual({ tone: "muted", text: "Saved 5m ago" });
   });
 
+  it("treats a draft as saved when it differs only by the whitespace the server trims", () => {
+    const result = view({
+      draft: "  hello \n",
+      saved: { body: "hello", updatedAt: savedAt(5 * 60_000) },
+    });
+    expect(result.canSave).toBe(false);
+    expect(result.status).toEqual({ tone: "muted", text: "Saved 5m ago" });
+  });
+
   it("allows a draft exactly at the limit", () => {
     const result = view({ draft: "x".repeat(10) });
     expect(result.overLimit).toBe(false);
