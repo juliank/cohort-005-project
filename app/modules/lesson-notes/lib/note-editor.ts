@@ -1,3 +1,5 @@
+import { formatRelativeTime } from "~/lib/utils";
+
 export type SavedNote = { body: string; updatedAt: string };
 
 export type NoteEditorInput = {
@@ -57,22 +59,8 @@ function statusFor({
   if (error) return { tone: "error", text: error };
   if (dirty) return { tone: "muted", text: "Unsaved changes" };
   if (saved) {
-    const text =
-      now === null ? "Saved" : `Saved ${relativeTime(saved.updatedAt, now)}`;
-    return { tone: "muted", text };
+    const ago = now === null ? "" : formatRelativeTime(saved.updatedAt, now);
+    return { tone: "muted", text: ago ? `Saved ${ago}` : "Saved" };
   }
   return { tone: "none" };
-}
-
-function relativeTime(iso: string, now: number): string {
-  const elapsed = now - new Date(iso).getTime();
-  if (Number.isNaN(elapsed) || elapsed < 60_000) return "just now";
-
-  const minutes = Math.floor(elapsed / 60_000);
-  if (minutes < 60) return `${minutes}m ago`;
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-
-  return `${Math.floor(hours / 24)}d ago`;
 }

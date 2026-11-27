@@ -92,7 +92,7 @@ describe("describeNoteEditor", () => {
     [60 * 60_000, "Saved 1h ago"],
     [23 * 3_600_000, "Saved 23h ago"],
     [24 * 3_600_000, "Saved 1d ago"],
-    [40 * 86_400_000, "Saved 40d ago"],
+    [29 * 86_400_000, "Saved 29d ago"],
   ])("describes a note saved %ims ago as %s", (msAgo, text) => {
     const result = view({
       draft: "a",
@@ -101,12 +101,23 @@ describe("describeNoteEditor", () => {
     expect(result.status).toEqual({ tone: "muted", text });
   });
 
-  it("falls back to 'just now' for an unparseable timestamp", () => {
+  it("shows the date for a note saved more than a month ago", () => {
+    const updatedAt = savedAt(40 * 86_400_000);
+    const date = new Date(updatedAt).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+    const result = view({ draft: "a", saved: { body: "a", updatedAt } });
+    expect(result.status).toEqual({ tone: "muted", text: `Saved ${date}` });
+  });
+
+  it("says only 'Saved' for an unparseable timestamp", () => {
     const result = view({
       draft: "a",
       saved: { body: "a", updatedAt: "not a date" },
     });
-    expect(result.status).toEqual({ tone: "muted", text: "Saved just now" });
+    expect(result.status).toEqual({ tone: "muted", text: "Saved" });
   });
 
   it("says only 'Saved' before the client knows the time", () => {
