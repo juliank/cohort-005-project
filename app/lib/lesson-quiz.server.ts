@@ -71,35 +71,37 @@ export type QuestionResult = {
 
 type QuizQuestion = typeof quizQuestions.$inferSelect;
 
-function correctOptionIdFor(question: QuizQuestion): number | null {
-  if (question.questionType === "multiple_choice") {
-    const opts = db
-      .select()
-      .from(quizOptions)
-      .where(eq(quizOptions.questionId, question.id))
-      .all();
-    const correctOpt = opts.find((o) => o.isCorrect === true);
-    return correctOpt ? correctOpt.id : null;
-  }
-  if (question.questionType === "true_false") {
-    const correctOpt = db
-      .select()
-      .from(quizOptions)
-      .where(
-        and(
-          eq(quizOptions.questionId, question.id),
-          eq(quizOptions.isCorrect, true)
-        )
+const GRADED_QUESTION_TYPES = new Set(["multiple_choice", "true_false"]);
+
+/** The first correct option of each question, in one query. */
+function correctOptionIds(questions: QuizQuestion[]): Map<number, number> {
+  const correctOptions = db
+    .select()
+    .from(quizOptions)
+    .where(
+      and(
+        inArray(
+          quizOptions.questionId,
+          questions.map((question) => question.id)
+        ),
+        eq(quizOptions.isCorrect, true)
       )
-      .get();
-    return correctOpt ? correctOpt.id : null;
+    )
+    .all();
+
+  const byQuestion = new Map<number, number>();
+  for (const option of correctOptions) {
+    if (!byQuestion.has(option.questionId)) {
+      byQuestion.set(option.questionId, option.id);
+    }
   }
-  return null;
+  return byQuestion;
 }
 
 function gradeQuestion(
   question: QuizQuestion,
-  selected: number | undefined
+  selected: number | undefined,
+  correctOptions: Map<number, number>
 ): QuestionResult {
   if (!selected) {
     return {
@@ -109,7 +111,9 @@ function gradeQuestion(
       correctOptionId: null,
     };
   }
-  const correctOptionId = correctOptionIdFor(question);
+  const correctOptionId = GRADED_QUESTION_TYPES.has(question.questionType)
+    ? (correctOptions.get(question.id) ?? null)
+    : null;
   return {
     questionId: question.id,
     correct: selected === correctOptionId,
@@ -160,8 +164,9 @@ export function computeResult(
       .orderBy(quizQuestions.position)
       .all();
 
+    const correctOptions = correctOptionIds(questions);
     const questionResults = questions.map((q) =>
-      gradeQuestion(q, selectedAnswers[q.id])
+      gradeQuestion(q, selectedAnswers[q.id], correctOptions)
     );
     const correct = questionResults.filter((r) => r.correct).length;
     const total = questions.length;
