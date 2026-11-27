@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import type { Route } from "./+types/home";
 import { Button } from "~/components/ui/button";
 import {
@@ -14,12 +14,15 @@ import {
   GraduationCap,
   Users,
   ArrowRight,
-  User,
   Moon,
   Sun,
+  type LucideIcon,
 } from "lucide-react";
+import { CourseByline } from "~/components/course-byline";
 import { CourseImage } from "~/components/course-image";
 import { DevUI } from "~/components/dev-ui";
+import { LandingHero } from "~/components/landing-hero";
+import { heroActions } from "~/modules/landing";
 import { getCurrentUserId, getDevCountry } from "~/lib/session";
 import { getCountryTierInfo, COUNTRIES } from "~/lib/ppp";
 import { eq, like, and, or, sql } from "drizzle-orm";
@@ -174,6 +177,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     countries,
   } = loaderData;
   const [isDark, setIsDark] = useState(false);
+  const actions = heroActions(currentUser);
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains("dark"));
@@ -234,51 +238,25 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </div>
       </header>
 
-      <section className="mx-auto max-w-6xl px-6 py-24 text-center">
-        <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
-          Learn to code,
-          <br />
-          <span className="text-muted-foreground">at your own pace</span>
-        </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-          Structured courses built by experienced instructors. Track your
-          progress, take quizzes, and build real-world skills.
-        </p>
-        <div className="mt-10 flex items-center justify-center gap-4">
-          <Button asChild size="lg">
-            <Link to="/courses">
-              Browse Courses
-              <ArrowRight className="ml-2 size-4" />
-            </Link>
-          </Button>
-        </div>
-      </section>
+      <LandingHero actions={actions} course={featuredCourses[0]} />
 
-      <section className="border-y border-border bg-muted/50 py-16">
+      <section className="border-y border-border bg-muted/50 py-12">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-6 sm:grid-cols-3">
-          <div className="text-center">
-            <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-lg bg-primary/10">
-              <BookOpen className="size-6 text-primary" />
-            </div>
-            <p className="text-2xl font-bold">{totalCourses}</p>
-            <p className="text-sm text-muted-foreground">Available Courses</p>
-          </div>
-          <div className="text-center">
-            <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-lg bg-primary/10">
-              <GraduationCap className="size-6 text-primary" />
-            </div>
-            <p className="text-2xl font-bold">{totalCategories}</p>
-            <p className="text-sm text-muted-foreground">Categories</p>
-          </div>
-          <div className="text-center">
-            <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-lg bg-primary/10">
-              <Users className="size-6 text-primary" />
-            </div>
-            <p className="text-2xl font-bold">Self-paced</p>
-            <p className="text-sm text-muted-foreground">
-              Learn on your schedule
-            </p>
-          </div>
+          <StatTile
+            icon={BookOpen}
+            value={totalCourses}
+            label="Available Courses"
+          />
+          <StatTile
+            icon={GraduationCap}
+            value={totalCategories}
+            label="Categories"
+          />
+          <StatTile
+            icon={Users}
+            value="Self-paced"
+            label="Learn on your schedule"
+          />
         </div>
       </section>
 
@@ -323,15 +301,12 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                       {course.description}
                     </p>
                   </CardContent>
-                  <CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <User className="size-3" />
-                      {course.instructorName ?? "Instructor"}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <BookOpen className="size-3" />
-                      {course.lessonCount} lessons
-                    </span>
+                  <CardFooter>
+                    <CourseByline
+                      className="w-full"
+                      instructorName={course.instructorName}
+                      lessonCount={course.lessonCount}
+                    />
                   </CardFooter>
                 </Card>
               </Link>
@@ -340,9 +315,23 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </section>
       )}
 
-      <footer className="border-t border-border py-8">
-        <div className="mx-auto max-w-6xl px-6 text-center text-sm text-muted-foreground">
-          Cadence
+      <footer className="border-t border-border py-10">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-bold text-foreground">Cadence</p>
+            <p className="mt-1">Learn to code, at your own pace.</p>
+          </div>
+          <nav className="flex gap-6">
+            {actions.map((action) => (
+              <Link
+                key={action.to}
+                to={action.to}
+                className="transition-colors hover:text-foreground"
+              >
+                {action.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </footer>
 
@@ -353,6 +342,28 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         countryTierInfo={countryTierInfo}
         countries={countries}
       />
+    </div>
+  );
+}
+
+function StatTile({
+  icon: Icon,
+  value,
+  label,
+}: {
+  icon: LucideIcon;
+  value: ReactNode;
+  label: string;
+}) {
+  return (
+    <div className="flex items-center gap-4">
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+        <Icon className="size-6 text-primary" />
+      </div>
+      <div>
+        <p className="text-2xl font-bold">{value}</p>
+        <p className="text-sm text-muted-foreground">{label}</p>
+      </div>
     </div>
   );
 }
