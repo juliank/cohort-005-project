@@ -14,11 +14,11 @@ import {
   GraduationCap,
   Users,
   ArrowRight,
-  User,
   Moon,
   Sun,
   type LucideIcon,
 } from "lucide-react";
+import { CourseByline } from "~/components/course-byline";
 import { CourseImage } from "~/components/course-image";
 import { DevUI } from "~/components/dev-ui";
 import { LandingHero } from "~/components/landing-hero";
@@ -301,15 +301,12 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                       {course.description}
                     </p>
                   </CardContent>
-                  <CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <User className="size-3" />
-                      {course.instructorName ?? "Instructor"}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <BookOpen className="size-3" />
-                      {course.lessonCount} lessons
-                    </span>
+                  <CardFooter>
+                    <CourseByline
+                      className="w-full"
+                      instructorName={course.instructorName}
+                      lessonCount={course.lessonCount}
+                    />
                   </CardFooter>
                 </Card>
               </Link>

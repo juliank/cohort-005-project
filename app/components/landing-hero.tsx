@@ -1,6 +1,7 @@
 import { Link } from "react-router";
-import { ArrowRight, BookOpen, Sparkles, User } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { CourseByline } from "~/components/course-byline";
 import { CourseImage } from "~/components/course-image";
 import { cn } from "~/lib/utils";
 import type { HeroAction } from "~/modules/landing";
@@ -84,16 +85,11 @@ function HeroCoursePreview({ course }: { course: HeroCourse }) {
           <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
             {course.description}
           </p>
-          <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <User className="size-3" />
-              {course.instructorName ?? "Instructor"}
-            </span>
-            <span className="flex items-center gap-1">
-              <BookOpen className="size-3" />
-              {course.lessonCount} lessons
-            </span>
-          </div>
+          <CourseByline
+            className="mt-4"
+            instructorName={course.instructorName}
+            lessonCount={course.lessonCount}
+          />
         </div>
       </Link>
     </div>
