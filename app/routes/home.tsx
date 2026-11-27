@@ -177,6 +177,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     countries,
   } = loaderData;
   const [isDark, setIsDark] = useState(false);
+  const actions = heroActions(currentUser);
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains("dark"));
@@ -237,10 +238,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </div>
       </header>
 
-      <LandingHero
-        actions={heroActions(currentUser)}
-        course={featuredCourses[0]}
-      />
+      <LandingHero actions={actions} course={featuredCourses[0]} />
 
       <section className="border-y border-border bg-muted/50 py-12">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-6 sm:grid-cols-3">
@@ -327,7 +325,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             <p className="mt-1">Learn to code, at your own pace.</p>
           </div>
           <nav className="flex gap-6">
-            {heroActions(currentUser).map((action) => (
+            {actions.map((action) => (
               <Link
                 key={action.to}
                 to={action.to}
